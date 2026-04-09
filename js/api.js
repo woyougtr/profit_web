@@ -1,6 +1,9 @@
 // API 配置
 const API_BASE = 'https://cfworkers.6666521.xyz';
 
+// 汇率 API（免费，无需 Key）
+const EXCHANGE_RATE_API = 'https://open.er-api.com/v6/latest/USD';
+
 // Token 管理
 const TokenManager = {
   get() {
@@ -124,5 +127,21 @@ const API = {
     });
     if (!res.ok) throw new Error('获取账户失败');
     return res.json();
+  },
+  
+  // 获取美元兑人民币汇率
+  async getExchangeRate() {
+    try {
+      const res = await fetch(EXCHANGE_RATE_API);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.result === 'success' && data.rates) {
+          return data.rates.CNY;
+        }
+      }
+    } catch (e) {
+      console.error('获取汇率失败:', e);
+    }
+    return null;
   }
 };

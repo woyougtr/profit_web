@@ -12,6 +12,7 @@ const App = {
       try {
         const user = await API.me();
         this.showMainPage(user.email);
+        await this.loadExchangeRate();
         await this.loadData();
       } catch (e) {
         TokenManager.remove();
@@ -22,6 +23,15 @@ const App = {
     }
     
     this.bindEvents();
+  },
+  
+  // 加载汇率
+  async loadExchangeRate() {
+    const rate = await API.getExchangeRate();
+    if (rate) {
+      this.exchangeRate = rate;
+      document.getElementById('exchange-rate').value = rate.toFixed(4);
+    }
   },
   
   // 绑定事件
