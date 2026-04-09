@@ -699,22 +699,27 @@ main {
 
 /* ===== 图标按钮 ===== */
 .icon-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: var(--background);
-  border-radius: 10px;
-  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  color: var(--text-secondary);
 }
 
 .icon-btn:hover {
-  background: var(--primary);
-  color: white;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ===== 下拉菜单 ===== */

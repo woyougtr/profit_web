@@ -615,23 +615,28 @@ const App = {
     
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+    const lastDay = isCurrentMonth ? today.getDate() : new Date(year, month + 1, 0).getDate();
     
-    // 准备数据
+    // 准备数据（只到今天）
     const labels = [];
-    const data = [];
-    let cumulative = 0;
     const cumulativeData = [];
+    let cumulative = 0;
+    let lastValidIndex = -1;
     
-    for (let d = 1; d <= daysInMonth; d++) {
+    for (let d = 1; d <= lastDay; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       labels.push(`${month + 1}/${d}`);
       
       const profit = this.getDayProfit(dateStr);
       if (profit !== null) {
         cumulative += profit;
+        lastValidIndex = d - 1;
       }
-      cumulativeData.push(cumulative);
+      
+      // 没数据的日期设为null，这样图表会断开
+      cumulativeData.push(profit !== null ? cumulative : null);
     }
     
     this.chartInstance = new Chart(ctx, {
@@ -646,7 +651,8 @@ const App = {
           fill: true,
           tension: 0.3,
           pointRadius: 2,
-          pointHoverRadius: 6
+          pointHoverRadius: 6,
+          spanGaps: true  // 连接断开的线段
         }]
       },
       options: {
@@ -661,8 +667,9 @@ const App = {
             display: false
           },
           tooltip: {
+            filter: (item) => item.raw !== null,
             callbacks: {
-              label: (context) => `¥${context.parsed.y.toFixed(2)}`
+              label: (context) => context.raw !== null ? `¥${context.raw.toFixed(2)}` : ''
             }
           }
         },
