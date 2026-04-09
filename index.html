@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>电商利润记录</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div id="app">
@@ -122,7 +124,12 @@
 
         <!-- 日历和统计 -->
         <section class="calendar-section">
-          <h2>利润日历</h2>
+          <div class="section-header">
+            <h2>利润日历</h2>
+            <div class="header-actions">
+              <button id="toggle-chart-btn" class="icon-btn" title="图表">📈</button>
+            </div>
+          </div>
           <div class="calendar-header">
             <button id="prev-month">&lt;</button>
             <span id="current-month"></span>
@@ -130,7 +137,18 @@
           </div>
           <div class="calendar-grid" id="calendar-grid"></div>
           
-          <div class="month-stats" id="month-stats">
+          <!-- 月度对比 -->
+  <div class="compare-section" id="compare-section" style="display:none;">
+    <div class="compare-card">
+      <div class="compare-label">本月 vs 上月</div>
+      <div class="compare-value" id="compare-value">--</div>
+      <div class="compare-bar">
+        <div class="compare-bar-fill" id="compare-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="month-stats" id="month-stats">
             <div class="stat-item">
               <span>本月利润</span>
               <span id="month-profit">¥0.00</span>
@@ -144,10 +162,61 @@
 
         <!-- 历史记录 -->
         <section class="history-section">
-          <h2 id="history-title">最近记录</h2>
+          <div class="section-header">
+            <h2 id="history-title">最近记录</h2>
+            <div class="header-actions">
+              <div class="dropdown">
+                <button id="export-btn" class="icon-btn">📤</button>
+                <div id="export-menu" class="dropdown-menu" style="display:none;">
+                  <button data-range="current">本月数据</button>
+                  <button data-range="last">上月数据</button>
+                  <button data-range="custom" id="export-custom">自定义范围</button>
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="history-list" class="history-list"></div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <!-- 图表弹窗 -->
+  <div id="chart-modal" class="modal" style="display:none;">
+    <div class="modal-content chart-modal-content">
+      <div class="modal-header">
+        <h3>利润趋势图</h3>
+        <button class="modal-close" onclick="closeChartModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <canvas id="profit-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出日期选择弹窗 -->
+  <div id="export-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>选择导出范围</h3>
+        <button class="modal-close" onclick="closeExportModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="date-range-picker">
+          <div class="date-input">
+            <label>开始日期</label>
+            <input type="date" id="export-start">
+          </div>
+          <div class="date-input">
+            <label>结束日期</label>
+            <input type="date" id="export-end">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel" onclick="closeExportModal()">取消</button>
+        <button class="modal-save" onclick="confirmExport()">导出</button>
+      </div>
     </div>
   </div>
 

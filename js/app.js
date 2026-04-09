@@ -1,9 +1,10 @@
 // App 状态
 const App = {
   currentMonth: new Date(),
-  selectedDate: null,  // 选中的日期
+  selectedDate: null,
   transactions: [],
   exchangeRate: 7.24,
+  chartInstance: null,
   
   // 初始化
   async init() {
@@ -104,6 +105,8 @@ const App = {
       this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
       this.renderCalendar();
       this.renderHistory();
+      this.renderMonthStats();
+      this.renderCompare();
     });
     
     document.getElementById('next-month').addEventListener('click', () => {
@@ -111,6 +114,41 @@ const App = {
       this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
       this.renderCalendar();
       this.renderHistory();
+      this.renderMonthStats();
+      this.renderCompare();
+    });
+    
+    // 导出按钮
+    document.getElementById('export-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = document.getElementById('export-menu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    // 导出菜单选项
+    document.querySelectorAll('#export-menu button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const range = e.target.dataset.range;
+        document.getElementById('export-menu').style.display = 'none';
+        
+        if (range === 'current') {
+          this.exportData(this.getCurrentMonthRange());
+        } else if (range === 'last') {
+          this.exportData(this.getLastMonthRange());
+        } else if (range === 'custom') {
+          this.showExportModal();
+        }
+      });
+    });
+    
+    // 图表按钮
+    document.getElementById('toggle-chart-btn').addEventListener('click', () => {
+      this.showChartModal();
+    });
+    
+    // 点击其他区域关闭下拉菜单
+    document.addEventListener('click', () => {
+      document.getElementById('export-menu').style.display = 'none';
     });
   },
   
@@ -135,6 +173,7 @@ const App = {
       this.renderCalendar();
       this.renderHistory();
       this.renderMonthStats();
+      this.renderCompare();
     } catch (e) {
       console.error('加载数据失败:', e);
     }
@@ -201,14 +240,12 @@ const App = {
     
     try {
       if (editId) {
-        // 编辑模式
         await API.updateTransaction(editId, {
           amount: Math.abs(profit),
           note: noteText,
           occurred_at: new Date().toISOString()
         });
       } else {
-        // 新增模式
         await API.createTransaction({
           account_id: 'cash',
           category_id: profit >= 0 ? 'ecommerce_profit' : 'ecommerce_loss',
@@ -221,9 +258,9 @@ const App = {
       
       await this.loadData();
       this.resetForm();
-      alert('保存成功！');
+      this.showToast('保存成功！');
     } catch (e) {
-      alert('保存失败: ' + e.message);
+      this.showToast('保存失败: ' + e.message, 'error');
     }
   },
   
@@ -253,8 +290,34 @@ const App = {
       await API.deleteTransaction(id);
       await this.loadData();
     } catch (e) {
-      alert('删除失败: ' + e.message);
+      this.showToast('删除失败: ' + e.message, 'error');
     }
+  },
+  
+  // Toast 提示
+  showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: ${type === 'error' ? '#EF5350' : '#4CAF7C'};
+      color: white;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 2000;
+      animation: toastIn 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'toastOut 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
   },
   
   // 获取某天的利润
@@ -312,7 +375,6 @@ const App = {
         className += profit >= 0 ? ' has-profit' : ' has-loss';
       }
       
-      // 显示金额
       let amountHtml = '';
       if (profit !== null) {
         const displayProfit = profit >= 0 ? `+${profit.toFixed(0)}` : profit.toFixed(0);
@@ -327,7 +389,7 @@ const App = {
       day.addEventListener('click', () => {
         const date = day.dataset.date;
         if (this.selectedDate === date) {
-          this.selectedDate = null;  // 取消选择
+          this.selectedDate = null;
         } else {
           this.selectedDate = date;
         }
@@ -359,6 +421,56 @@ const App = {
     document.getElementById('month-count').textContent = monthTransactions.length;
   },
   
+  // 渲染月度对比
+  renderCompare() {
+    const compareSection = document.getElementById('compare-section');
+    
+    const currentYear = this.currentMonth.getFullYear();
+    const currentMonth = this.currentMonth.getMonth();
+    const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+    
+    // 上月
+    const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
+    const lastMonthStr = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    const getMonthProfit = (monthStr) => {
+      const txs = this.transactions.filter(tx => {
+        const txDate = tx.occurred_at.split('T')[0];
+        return txDate.startsWith(monthStr) && 
+               (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
+      });
+      return txs.reduce((sum, tx) => sum + (tx.type === 'income' ? tx.amount : -tx.amount), 0);
+    };
+    
+    const currentProfit = getMonthProfit(currentMonthStr);
+    const lastProfit = getMonthProfit(lastMonthStr);
+    
+    if (lastProfit === 0 && currentProfit === 0) {
+      compareSection.style.display = 'none';
+      return;
+    }
+    
+    compareSection.style.display = 'block';
+    
+    const compareValue = document.getElementById('compare-value');
+    const compareBarFill = document.getElementById('compare-bar-fill');
+    
+    if (lastProfit === 0) {
+      compareValue.textContent = currentProfit >= 0 ? `+¥${currentProfit.toFixed(2)}` : `-¥${Math.abs(currentProfit).toFixed(2)}`;
+      compareValue.className = 'compare-value ' + (currentProfit >= 0 ? 'up' : 'down');
+      compareBarFill.style.width = '100%';
+    } else {
+      const change = ((currentProfit - lastProfit) / Math.abs(lastProfit)) * 100;
+      const isUp = change >= 0;
+      compareValue.textContent = `${isUp ? '↑' : '↓'} ${Math.abs(change).toFixed(1)}%`;
+      compareValue.className = 'compare-value ' + (isUp ? 'up' : 'down');
+      
+      // 进度条（相对比例）
+      const ratio = Math.min(Math.abs(currentProfit) / Math.max(Math.abs(lastProfit), Math.abs(currentProfit)), 1);
+      compareBarFill.style.width = `${ratio * 100}%`;
+    }
+  },
+  
   // 渲染历史记录
   renderHistory() {
     const titleEl = document.getElementById('history-title');
@@ -367,7 +479,6 @@ const App = {
       return tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss';
     });
     
-    // 如果选了日期，按日期筛选
     if (this.selectedDate) {
       filteredTransactions = filteredTransactions.filter(tx => {
         const txDate = tx.occurred_at.split('T')[0];
@@ -376,7 +487,6 @@ const App = {
       const date = new Date(this.selectedDate);
       titleEl.textContent = `${date.getMonth() + 1}月${date.getDate()}日 记录`;
     } else {
-      // 显示当月所有记录，按时间倒序
       const year = this.currentMonth.getFullYear();
       const month = this.currentMonth.getMonth();
       const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
@@ -414,6 +524,169 @@ const App = {
         </div>
       `;
     }).join('');
+  },
+  
+  // ========== 导出 Excel ==========
+  getCurrentMonthRange() {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    const start = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    const end = `${year}-${String(month + 1).padStart(2, '0')}-${new Date(year, month + 1, 0).getDate()}`;
+    return { start, end };
+  },
+  
+  getLastMonthRange() {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    const lastMonthDate = new Date(year, month - 1, 1);
+    const lYear = lastMonthDate.getFullYear();
+    const lMonth = lastMonthDate.getMonth() + 1;
+    const start = `${lYear}-${String(lMonth).padStart(2, '0')}-01`;
+    const end = `${lYear}-${String(lMonth).padStart(2, '0')}-${new Date(lYear, lMonth, 0).getDate()}`;
+    return { start, end };
+  },
+  
+  exportData(range) {
+    const { start, end } = range;
+    
+    const filteredTransactions = this.transactions.filter(tx => {
+      const txDate = tx.occurred_at.split('T')[0];
+      return txDate >= start && txDate <= end && 
+             (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
+    }).sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
+    
+    if (filteredTransactions.length === 0) {
+      this.showToast('该范围内没有数据', 'error');
+      return;
+    }
+    
+    const data = filteredTransactions.map(tx => {
+      const date = new Date(tx.occurred_at);
+      return {
+        '日期': `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+        '时间': `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
+        '类型': tx.type === 'income' ? '利润' : '亏损',
+        '金额': tx.amount,
+        '备注': tx.note || ''
+      };
+    });
+    
+    // 添加汇总
+    const totalProfit = filteredTransactions.reduce((sum, tx) => 
+      sum + (tx.type === 'income' ? tx.amount : -tx.amount), 0);
+    
+    data.push({});
+    data.push({
+      '日期': '汇总',
+      '时间': '',
+      '类型': totalProfit >= 0 ? '净利润' : '净亏损',
+      '金额': Math.abs(totalProfit),
+      '备注': `${filteredTransactions.length} 条记录`
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '利润记录');
+    XLSX.writeFile(wb, `利润记录_${start}_${end}.xlsx`);
+    
+    this.showToast('导出成功！');
+  },
+  
+  showExportModal() {
+    const range = this.getCurrentMonthRange();
+    document.getElementById('export-start').value = range.start;
+    document.getElementById('export-end').value = range.end;
+    document.getElementById('export-modal').style.display = 'flex';
+  },
+  
+  // ========== 图表 ==========
+  showChartModal() {
+    document.getElementById('chart-modal').style.display = 'flex';
+    this.renderChart();
+  },
+  
+  renderChart() {
+    const ctx = document.getElementById('profit-chart');
+    if (!ctx) return;
+    
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+    }
+    
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // 准备数据
+    const labels = [];
+    const data = [];
+    let cumulative = 0;
+    const cumulativeData = [];
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      labels.push(`${month + 1}/${d}`);
+      
+      const profit = this.getDayProfit(dateStr);
+      if (profit !== null) {
+        cumulative += profit;
+      }
+      cumulativeData.push(cumulative);
+    }
+    
+    this.chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '累计利润',
+          data: cumulativeData,
+          borderColor: '#4CAF7C',
+          backgroundColor: 'rgba(76, 175, 124, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => `¥${context.parsed.y.toFixed(2)}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            grid: {
+              color: '#f0f0f0'
+            },
+            ticks: {
+              callback: (value) => '¥' + value.toFixed(0)
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 15
+            }
+          }
+        }
+      }
+    });
   }
 };
 
@@ -431,7 +704,7 @@ async function submitEdit() {
   const note = document.getElementById('edit-note').value;
   
   if (!amount || amount <= 0) {
-    alert('请输入有效金额');
+    window.App.showToast('请输入有效金额', 'error');
     return;
   }
   
@@ -442,10 +715,54 @@ async function submitEdit() {
     });
     closeEditModal();
     await window.App.loadData();
+    window.App.showToast('保存成功！');
   } catch (e) {
-    alert('保存失败: ' + e.message);
+    window.App.showToast('保存失败: ' + e.message, 'error');
   }
 }
+
+// 关闭图表弹窗
+function closeChartModal() {
+  document.getElementById('chart-modal').style.display = 'none';
+}
+
+// 关闭导出弹窗
+function closeExportModal() {
+  document.getElementById('export-modal').style.display = 'none';
+}
+
+// 确认导出
+function confirmExport() {
+  const start = document.getElementById('export-start').value;
+  const end = document.getElementById('export-end').value;
+  
+  if (!start || !end) {
+    window.App.showToast('请选择日期范围', 'error');
+    return;
+  }
+  
+  if (start > end) {
+    window.App.showToast('开始日期不能晚于结束日期', 'error');
+    return;
+  }
+  
+  closeExportModal();
+  window.App.exportData({ start, end });
+}
+
+// 添加 toast 动画样式
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateX(-50%) translateY(0); }
+    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  }
+`;
+document.head.appendChild(style);
 
 // 启动
 document.addEventListener('DOMContentLoaded', () => window.App = App.init());
