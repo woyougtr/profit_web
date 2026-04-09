@@ -305,16 +305,10 @@ const App = {
     document.getElementById('edit-modal').style.display = 'flex';
   },
   
-  // 删除记录
-  async deleteRecord(id) {
-    if (!confirm('确定要删除这条记录吗？')) return;
-    
-    try {
-      await API.deleteTransaction(id);
-      await this.loadData();
-    } catch (e) {
-      this.showToast('删除失败: ' + e.message, 'error');
-    }
+  // 删除记录（显示确认弹窗）
+  deleteRecord(id) {
+    this.deleteId = id;
+    document.getElementById('delete-modal').style.display = 'flex';
   },
   
   // Toast 提示
@@ -811,6 +805,26 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// 关闭删除弹窗
+function closeDeleteModal() {
+  document.getElementById('delete-modal').style.display = 'none';
+}
+
+// 确认删除
+async function confirmDelete() {
+  const id = window.App.deleteId;
+  if (!id) return;
+  
+  try {
+    await API.deleteTransaction(id);
+    closeDeleteModal();
+    await window.App.loadData();
+    window.App.showToast('删除成功');
+  } catch (e) {
+    window.App.showToast('删除失败: ' + e.message, 'error');
+  }
+}
 
 // 启动
 document.addEventListener('DOMContentLoaded', () => window.App = App.init());

@@ -217,6 +217,25 @@
     </div>
   </div>
 
+  <!-- 删除确认弹窗 -->
+  <div id="delete-modal" class="modal" style="display:none;">
+    <div class="modal-content modal-delete">
+      <div class="modal-header">
+        <h3>确认删除</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-icon">🗑️</div>
+        <p>确定要删除这条记录吗？</p>
+        <p class="delete-hint">删除后无法恢复</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel" onclick="closeDeleteModal()">取消</button>
+        <button class="modal-delete-btn" onclick="confirmDelete()">删除</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 图表弹窗 -->
   <div id="chart-modal" class="modal" style="display:none;">
     <div class="modal-content chart-modal-content">

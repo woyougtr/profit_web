@@ -916,6 +916,40 @@ main {
   border-color: var(--primary);
 }
 
+/* ===== 删除确认弹窗 ===== */
+.modal-delete .modal-body {
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.modal-delete .delete-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.modal-delete .modal-body p {
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.modal-delete .delete-hint {
+  font-size: 13px;
+  color: var(--text-hint);
+}
+
+.modal-delete-btn {
+  background: var(--expense) !important;
+  color: white !important;
+}
+
+.modal-delete-btn:hover {
+  background: #d32f2f !important;
+}
+  outline: none;
+  border-color: var(--primary);
+}
+
 .loading {
   text-align: center;
   padding: 40px;
