@@ -260,10 +260,29 @@ const App = {
       
       await this.loadData();
       this.resetForm();
-      this.showToast('保存成功！');
+      this.showSaveSuccess();
     } catch (e) {
-      this.showToast('保存失败: ' + e.message, 'error');
+      this.showSaveError();
     }
+  }
+  
+  showSaveSuccess() {
+    const btn = document.getElementById('save-btn');
+    btn.classList.add('success');
+    btn.textContent = '已保存';
+    setTimeout(() => {
+      btn.classList.remove('success');
+      btn.textContent = '保存记录';
+    }, 1500);
+  }
+  
+  showSaveError() {
+    const btn = document.getElementById('save-btn');
+    btn.classList.add('error');
+    setTimeout(() => {
+      btn.classList.remove('error');
+    }, 400);
+    this.showToast('保存失败', 'error');
   },
   
   // 重置表单

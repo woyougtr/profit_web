@@ -281,8 +281,41 @@ main {
   transition: all 0.2s;
 }
 
+.save-btn {
+  position: relative;
+  overflow: hidden;
+}
+
 .save-btn:hover {
   background: var(--primary-light);
+}
+
+.save-btn.success {
+  background: #4CAF7C !important;
+}
+
+.save-btn.error {
+  animation: shake 0.4s ease;
+  background: var(--expense) !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.save-btn.success::after {
+  content: '✓';
+  position: absolute;
+  font-size: 20px;
+  animation: checkmark 0.3s ease forwards;
 }
 
 /* ===== 日历 ===== */
