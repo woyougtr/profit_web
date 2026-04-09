@@ -150,7 +150,35 @@ const API = {
     return res.json();
   },
   
-  // 获取美元兑人民币汇率
+  // 获取美元兑人民币汇率（带自动刷新，每天首次访问更新）
+  async getExchangeRate(forceRefresh = false) {
+    const today = new Date().toDateString();
+    const lastRefresh = localStorage.getItem('exchange_rate_date');
+    const cachedRate = localStorage.getItem('exchange_rate_value');
+    
+    // 如果今天已经刷新过，直接用缓存
+    if (!forceRefresh && lastRefresh === today && cachedRate) {
+      return parseFloat(cachedRate);
+    }
+    
+    try {
+      const res = await fetch(EXCHANGE_RATE_API);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.result === 'success' && data.rates?.CNY) {
+          const rate = data.rates.CNY;
+          // 缓存今天的汇率
+          localStorage.setItem('exchange_rate_date', today);
+          localStorage.setItem('exchange_rate_value', rate.toString());
+          return rate;
+        }
+      }
+    } catch (e) {
+      console.error('获取汇率失败:', e);
+    }
+    // 失败时用缓存或默认值
+    return cachedRate ? parseFloat(cachedRate) : 7.24;
+  }
   async getExchangeRate() {
     try {
       const res = await fetch(EXCHANGE_RATE_API);
