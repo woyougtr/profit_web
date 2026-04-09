@@ -219,19 +219,13 @@
 
   <!-- 删除确认弹窗 -->
   <div id="delete-modal" class="modal" style="display:none;">
-    <div class="modal-content modal-delete">
-      <div class="modal-header">
-        <h3>确认删除</h3>
-        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="delete-icon">🗑️</div>
-        <p>确定要删除这条记录吗？</p>
-        <p class="delete-hint">删除后无法恢复</p>
-      </div>
-      <div class="modal-footer">
-        <button class="modal-cancel" onclick="closeDeleteModal()">取消</button>
-        <button class="modal-delete-btn" onclick="confirmDelete()">删除</button>
+    <div class="delete-modal-content">
+      <div class="delete-modal-icon">×</div>
+      <div class="delete-modal-title">删除记录</div>
+      <div class="delete-modal-desc">确定要删除这条记录吗？</div>
+      <div class="delete-modal-actions">
+        <button class="delete-cancel-btn" onclick="closeDeleteModal()">取消</button>
+        <button class="delete-confirm-btn" onclick="confirmDelete()">删除</button>
       </div>
     </div>
   </div>
