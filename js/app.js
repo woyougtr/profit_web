@@ -99,6 +99,21 @@ window.App = {
     // 保存记录
     document.getElementById('save-btn').addEventListener('click', () => this.saveRecord());
     
+    // 月份选择器
+    document.getElementById('current-month').addEventListener('click', () => {
+      this.showMonthPicker();
+    });
+    
+    document.getElementById('picker-prev-year').addEventListener('click', () => {
+      this.pickerYear--;
+      this.renderMonthPicker();
+    });
+    
+    document.getElementById('picker-next-year').addEventListener('click', () => {
+      this.pickerYear++;
+      this.renderMonthPicker();
+    });
+    
     // 日历导航
     document.getElementById('prev-month').addEventListener('click', () => {
       this.selectedDate = null;
@@ -436,6 +451,43 @@ window.App = {
     profitEl.textContent = `¥${totalProfit >= 0 ? '' : '-'}${Math.abs(totalProfit).toFixed(2)}`;
     profitEl.style.color = totalProfit >= 0 ? 'var(--income)' : 'var(--expense)';
     document.getElementById('month-count').textContent = monthTransactions.length;
+  },
+  
+  // 显示月份选择器
+  showMonthPicker() {
+    this.pickerYear = this.currentMonth.getFullYear();
+    this.pickerMonth = this.currentMonth.getMonth();
+    this.renderMonthPicker();
+    document.getElementById('month-picker').style.display = 'block';
+  },
+  
+  // 渲染月份选择器
+  renderMonthPicker() {
+    document.getElementById('picker-year').textContent = this.pickerYear + '年';
+    const grid = document.getElementById('month-picker-grid');
+    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    const today = new Date();
+    const currentYear = this.currentMonth.getFullYear();
+    
+    grid.innerHTML = months.map((m, i) => {
+      const month = i;
+      const isActive = this.pickerYear === currentYear && month === this.pickerMonth;
+      const isFuture = this.pickerYear > today.getFullYear() || 
+                       (this.pickerYear === today.getFullYear() && month > today.getMonth());
+      return `<button class="${isActive ? 'active' : ''} ${isFuture ? 'disabled' : ''}" 
+                     data-month="${month}" 
+                     onclick="window.App.selectMonth(${month})">${m}</button>`;
+    }).join('');
+  },
+  
+  // 选择月份
+  selectMonth(month) {
+    this.currentMonth = new Date(this.pickerYear, month, 1);
+    this.selectedDate = null;
+    document.getElementById('month-picker').style.display = 'none';
+    this.renderCalendar();
+    this.renderHistory();
+    this.renderMonthStats();
   },
   
   // 月度对比弹窗

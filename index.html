@@ -142,11 +142,21 @@
           </div>
           <div class="calendar-header">
             <button id="prev-month">&lt;</button>
-            <span id="current-month"></span>
+            <span id="current-month" class="month-picker-trigger"></span>
             <button id="next-month">&gt;</button>
           </div>
           <div class="calendar-grid" id="calendar-grid"></div>
           
+          <!-- 月份选择器 -->
+          <div id="month-picker" class="month-picker" style="display:none;">
+            <div class="month-picker-header">
+              <button id="picker-prev-year">&lt;</button>
+              <span id="picker-year"></span>
+              <button id="picker-next-year">&gt;</button>
+            </div>
+            <div class="month-picker-grid" id="month-picker-grid"></div>
+          </div>
+
           <div class="month-stats" id="month-stats">
             <div class="stat-item">
               <span>本月利润</span>

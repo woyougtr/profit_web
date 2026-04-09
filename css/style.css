@@ -424,6 +424,88 @@ main {
   border-radius: 10px;
 }
 
+.month-picker-trigger {
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.month-picker-trigger:hover {
+  background: var(--background);
+}
+
+.month-picker {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.month-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.month-picker-header button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--background);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.month-picker-header button:hover {
+  background: var(--border);
+}
+
+.month-picker-header span {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.month-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.month-picker-grid button {
+  padding: 12px 8px;
+  border: none;
+  background: var(--background);
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.month-picker-grid button:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.month-picker-grid button.active {
+  background: var(--primary);
+  color: white;
+}
+
+.month-picker-grid button.disabled {
+  color: var(--text-hint);
+  cursor: not-allowed;
+}
+
+.month-picker-grid button.disabled:hover {
+  background: var(--background);
+  color: var(--text-hint);
+}
+
 .month-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
