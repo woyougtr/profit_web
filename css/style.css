@@ -374,7 +374,8 @@ main {
 }
 
 .calendar-day.today {
-  border: 2px solid var(--primary);
+  background: rgba(76, 175, 124, 0.08);
+  border-radius: 10px;
 }
 
 .calendar-day.selected {
