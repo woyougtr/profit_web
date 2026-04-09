@@ -144,19 +144,18 @@
             <button id="prev-month">&lt;</button>
             <span id="current-month" class="month-picker-trigger"></span>
             <button id="next-month">&gt;</button>
+            <!-- 月份选择器 -->
+            <div id="month-picker" class="month-picker" style="display:none;">
+              <button class="month-picker-close" onclick="window.App.closeMonthPicker()">×</button>
+              <div class="month-picker-header">
+                <button id="picker-prev-year">&lt;</button>
+                <span id="picker-year"></span>
+                <button id="picker-next-year">&gt;</button>
+              </div>
+              <div class="month-picker-grid" id="month-picker-grid"></div>
+            </div>
           </div>
           <div class="calendar-grid" id="calendar-grid"></div>
-          
-          <!-- 月份选择器 -->
-          <div id="month-picker" class="month-picker" style="display:none;">
-            <button class="month-picker-close" onclick="window.App.closeMonthPicker()">×</button>
-            <div class="month-picker-header">
-              <button id="picker-prev-year">&lt;</button>
-              <span id="picker-year"></span>
-              <button id="picker-next-year">&gt;</button>
-            </div>
-            <div class="month-picker-grid" id="month-picker-grid"></div>
-          </div>
 
           <div class="month-stats" id="month-stats">
             <div class="stat-item">
