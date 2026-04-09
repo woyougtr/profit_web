@@ -1098,3 +1098,53 @@ main {
     max-width: none;
   }
 }
+
+/* ===== 手机端适配 (< 480px) ===== */
+@media (max-width: 480px) {
+  .input-row {
+    gap: 8px;
+  }
+  
+  .input-row label {
+    width: 56px;
+    font-size: 13px;
+  }
+  
+  .input-row input[type="number"],
+  .input-row input[type="text"] {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+  
+  .input-row select {
+    padding: 12px 8px;
+    font-size: 13px;
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+  
+  .history-item {
+    padding: 14px 12px;
+    gap: 8px;
+  }
+  
+  .history-item .note {
+    max-width: 80px;
+  }
+  
+  .history-item .amount {
+    font-size: 14px;
+    margin-left: 8px;
+  }
+  
+  .history-item .actions {
+    gap: 4px;
+    margin-left: 6px;
+  }
+  
+  .history-item .edit-btn,
+  .history-item .delete-btn {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+}
