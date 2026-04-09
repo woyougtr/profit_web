@@ -264,8 +264,9 @@ const App = {
     } catch (e) {
       this.showSaveError();
     }
-  }
+  },
   
+  // 显示保存成功动画
   showSaveSuccess() {
     const btn = document.getElementById('save-btn');
     btn.classList.add('success');
@@ -274,8 +275,9 @@ const App = {
       btn.classList.remove('success');
       btn.textContent = '保存记录';
     }, 1500);
-  }
+  },
   
+  // 显示保存失败动画
   showSaveError() {
     const btn = document.getElementById('save-btn');
     btn.classList.add('error');
