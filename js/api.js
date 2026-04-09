@@ -179,18 +179,4 @@ const API = {
     // 失败时用缓存或默认值
     return cachedRate ? parseFloat(cachedRate) : 7.24;
   }
-  async getExchangeRate() {
-    try {
-      const res = await fetch(EXCHANGE_RATE_API);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.result === 'success' && data.rates?.CNY) {
-          return data.rates.CNY;
-        }
-      }
-    } catch (e) {
-      console.error('获取汇率失败:', e);
-    }
-    return null;
-  }
 };
