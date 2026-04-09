@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电商利润记录</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 登录注册页面 -->
+    <div id="auth-page" class="page">
+      <div class="auth-container">
+        <h1>💰 电商利润记录</h1>
+        <div class="auth-tabs">
+          <button class="tab-btn active" data-tab="login">登录</button>
+          <button class="tab-btn" data-tab="register">注册</button>
+        </div>
+        
+        <!-- 登录表单 -->
+        <form id="login-form" class="auth-form">
+          <input type="email" id="login-email" placeholder="邮箱" required>
+          <input type="password" id="login-password" placeholder="密码" required>
+          <button type="submit">登录</button>
+        </form>
+        
+        <!-- 注册表单 -->
+        <form id="register-form" class="auth-form" style="display:none;">
+          <input type="email" id="register-email" placeholder="邮箱" required>
+          <input type="password" id="register-password" placeholder="密码（至少6位）" required minlength="6">
+          <button type="submit">注册</button>
+        </form>
+        
+        <p id="auth-error" class="error"></p>
+      </div>
+    </div>
+
+    <!-- 主页面 -->
+    <div id="main-page" class="page" style="display:none;">
+      <header>
+        <h1>💰 电商利润记录</h1>
+        <div class="user-info">
+          <span id="user-email"></span>
+          <button id="logout-btn">退出</button>
+        </div>
+      </header>
+
+      <main>
+        <!-- 利润计算器 -->
+        <section class="calculator">
+          <h2>利润计算器</h2>
+          
+          <!-- 汇率显示 -->
+          <div class="rate-display">
+            <span>汇率: 1 USD = </span>
+            <input type="number" id="exchange-rate" value="7.24" step="0.0001">
+            <span> CNY</span>
+          </div>
+
+          <!-- 利润预览 -->
+          <div class="profit-preview" id="profit-preview">
+            <span>预计利润</span>
+            <span id="profit-amount" class="profit-value">¥0.00</span>
+          </div>
+
+          <!-- 输入表单 -->
+          <div class="input-group">
+            <div class="input-row">
+              <label>售价</label>
+              <input type="number" id="sale-price" step="0.01" placeholder="0">
+              <select id="sale-currency">
+                <option value="USD">$ USD</option>
+                <option value="CNY">¥ CNY</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <label>平台补贴</label>
+              <input type="number" id="subsidy" step="0.01" placeholder="0">
+              <select id="subsidy-currency">
+                <option value="USD">$ USD</option>
+                <option value="CNY">¥ CNY</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <label>货物成本</label>
+              <input type="number" id="cost" step="0.01" placeholder="0">
+              <select id="cost-currency">
+                <option value="CNY">¥ CNY</option>
+                <option value="USD">$ USD</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <label>头程运费</label>
+              <input type="number" id="first-shipping" step="0.01" placeholder="0">
+              <select id="first-shipping-currency">
+                <option value="CNY">¥ CNY</option>
+                <option value="USD">$ USD</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <label>尾程运费</label>
+              <input type="number" id="last-shipping" step="0.01" placeholder="0">
+              <select id="last-shipping-currency">
+                <option value="USD">$ USD</option>
+                <option value="CNY">¥ CNY</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <label>备注</label>
+              <input type="text" id="note" placeholder="选填">
+            </div>
+          </div>
+
+          <button id="save-btn" class="save-btn">保存记录</button>
+        </section>
+
+        <!-- 日历和统计 -->
+        <section class="calendar-section">
+          <h2>利润日历</h2>
+          <div class="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <span id="current-month"></span>
+            <button id="next-month">&gt;</button>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+          
+          <div class="month-stats" id="month-stats">
+            <div class="stat-item">
+              <span>本月利润</span>
+              <span id="month-profit">¥0.00</span>
+            </div>
+            <div class="stat-item">
+              <span>记录条数</span>
+              <span id="month-count">0</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 历史记录 -->
+        <section class="history-section">
+          <h2>最近记录</h2>
+          <div id="history-list" class="history-list"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #4CAF7C;
+  --primary-light: #81C784;
+  --expense: #EF5350;
+  --income: #4CAF7C;
+  --background: #F5F5F5;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --border: #E0E0E0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--background);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* 页面容器 */
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 认证页面 */
+.auth-container {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  margin-top: 60px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.auth-container h1 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 24px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: var(--background);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.error {
+  color: var(--expense);
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* 主页面头部 */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#logout-btn {
+  padding: 8px 16px;
+  background: var(--expense);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* 利润计算器 */
+.calculator {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.calculator h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.rate-display {
+  text-align: center;
+  padding: 12px;
+  background: var(--background);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+#exchange-rate {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.profit-preview {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 24px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profit-preview.loss {
+  background: linear-gradient(135deg, var(--expense), #FF8A80);
+}
+
+.profit-preview span:first-child {
+  display: block;
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.profit-value {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-row label {
+  width: 70px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.input-row input[type="number"],
+.input-row input[type="text"] {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.input-row select {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* 日历 */
+.calendar-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.calendar-section h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendar-header button {
+  padding: 8px 16px;
+  border: none;
+  background: var(--background);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.calendar-header span {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.calendar-day.empty {
+  cursor: default;
+}
+
+.calendar-day.has-profit {
+  background: rgba(76, 175, 124, 0.15);
+  color: var(--income);
+}
+
+.calendar-day.has-loss {
+  background: rgba(239, 83, 80, 0.15);
+  color: var(--expense);
+}
+
+.calendar-day.today {
+  border: 2px solid var(--primary);
+}
+
+.calendar-day.selected {
+  background: var(--primary);
+  color: white;
+}
+
+.month-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-item {
+  flex: 1;
+  padding: 16px;
+  background: var(--background);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-item span:first-child {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.stat-item span:last-child {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--income);
+}
+
+/* 历史记录 */
+.history-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.history-section h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  background: var(--background);
+  border-radius: 12px;
+}
+
+.history-item .info {
+  flex: 1;
+}
+
+.history-item .date {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.history-item .note {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.history-item .amount {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.history-item .amount.profit {
+  color: var(--income);
+}
+
+.history-item .amount.loss {
+  color: var(--expense);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
