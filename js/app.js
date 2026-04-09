@@ -459,6 +459,26 @@ window.App = {
     this.pickerMonth = this.currentMonth.getMonth();
     this.renderMonthPicker();
     document.getElementById('month-picker').style.display = 'block';
+    
+    // 点击其他区域关闭
+    setTimeout(() => {
+      document.addEventListener('click', this.monthPickerClickOutside);
+    }, 0);
+  },
+  
+  // 关闭月份选择器
+  closeMonthPicker() {
+    document.getElementById('month-picker').style.display = 'none';
+    document.removeEventListener('click', this.monthPickerClickOutside);
+  },
+  
+  // 点击外部关闭
+  monthPickerClickOutside(e) {
+    const picker = document.getElementById('month-picker');
+    const trigger = document.getElementById('current-month');
+    if (!picker.contains(e.target) && !trigger.contains(e.target)) {
+      window.App.closeMonthPicker();
+    }
   },
   
   // 渲染月份选择器
@@ -484,7 +504,7 @@ window.App = {
   selectMonth(month) {
     this.currentMonth = new Date(this.pickerYear, month, 1);
     this.selectedDate = null;
-    document.getElementById('month-picker').style.display = 'none';
+    this.closeMonthPicker();
     this.renderCalendar();
     this.renderHistory();
     this.renderMonthStats();
