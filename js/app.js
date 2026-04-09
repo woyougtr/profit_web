@@ -1,5 +1,5 @@
 // App 状态
-const App = {
+window.App = {
   currentMonth: new Date(),
   selectedDate: null,
   transactions: [],
@@ -548,8 +548,8 @@ const App = {
             ${isProfit ? '+' : '-'}¥${tx.amount.toFixed(2)}
           </div>
           <div class="actions">
-            <button class="edit-btn" onclick="App.openEditModal(${JSON.stringify(tx).replace(/"/g, '&quot;')})">编辑</button>
-            <button class="delete-btn" onclick="App.deleteRecord('${tx.id}')">删除</button>
+            <button class="edit-btn" onclick="window.App.openEditModal(${JSON.stringify(tx).replace(/"/g, '&quot;')})">编辑</button>
+            <button class="delete-btn" onclick="window.App.deleteRecord('${tx.id}')">删除</button>
           </div>
         </div>
       `;
@@ -827,4 +827,4 @@ async function confirmDelete() {
 }
 
 // 启动
-document.addEventListener('DOMContentLoaded', () => window.App = App.init());
+document.addEventListener('DOMContentLoaded', () => App.init());
