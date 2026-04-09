@@ -755,52 +755,86 @@ main {
   background: var(--background);
 }
 
-/* ===== 月度对比 ===== */
-.compare-section {
-  margin-bottom: 20px;
+/* ===== 月度对比弹窗 ===== */
+.compare-detail {
+  text-align: center;
 }
 
-.compare-card {
-  background: var(--card-bg);
+.compare-months {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.compare-month {
+  text-align: center;
+  padding: 20px 28px;
+  background: var(--background);
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: var(--shadow);
+  min-width: 120px;
 }
 
-.compare-label {
+.compare-month.current {
+  background: rgba(76, 175, 124, 0.1);
+}
+
+.compare-month.last {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.compare-month-label {
   font-size: 13px;
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
-.compare-value {
-  font-size: 24px;
+.compare-month-value {
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 12px;
+  color: var(--text-primary);
 }
 
-.compare-value.up {
+.compare-month-count {
+  font-size: 12px;
+  color: var(--text-hint);
+  margin-top: 4px;
+}
+
+.compare-arrow {
+  font-size: 24px;
+  color: var(--text-hint);
+}
+
+.compare-result {
+  padding: 24px;
+  background: var(--background);
+  border-radius: 16px;
+}
+
+.compare-change {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.compare-change.up {
   color: var(--income);
 }
 
-.compare-value.down {
+.compare-change.down {
   color: var(--expense);
 }
 
-.compare-bar {
-  height: 8px;
-  background: var(--background);
-  border-radius: 4px;
-  overflow: hidden;
+.compare-change.neutral {
+  color: var(--text-secondary);
 }
 
-.compare-bar-fill {
-  height: 100%;
-  background: var(--primary);
-  border-radius: 4px;
-  transition: width 0.5s ease;
+.compare-summary {
+  font-size: 14px;
+  color: var(--text-secondary);
 }
-
 /* ===== 图表弹窗 ===== */
 .chart-modal-content {
   max-width: 800px;

@@ -106,7 +106,6 @@ const App = {
       this.renderCalendar();
       this.renderHistory();
       this.renderMonthStats();
-      this.renderCompare();
     });
     
     document.getElementById('next-month').addEventListener('click', () => {
@@ -115,7 +114,6 @@ const App = {
       this.renderCalendar();
       this.renderHistory();
       this.renderMonthStats();
-      this.renderCompare();
     });
     
     // 导出按钮
@@ -146,6 +144,11 @@ const App = {
       this.showChartModal();
     });
     
+    // 对比按钮
+    document.getElementById('toggle-compare-btn').addEventListener('click', () => {
+      this.showCompareModal();
+    });
+    
     // 点击其他区域关闭下拉菜单
     document.addEventListener('click', () => {
       document.getElementById('export-menu').style.display = 'none';
@@ -173,7 +176,6 @@ const App = {
       this.renderCalendar();
       this.renderHistory();
       this.renderMonthStats();
-      this.renderCompare();
     } catch (e) {
       console.error('加载数据失败:', e);
     }
@@ -421,54 +423,67 @@ const App = {
     document.getElementById('month-count').textContent = monthTransactions.length;
   },
   
-  // 渲染月度对比
-  renderCompare() {
-    const compareSection = document.getElementById('compare-section');
-    
+  // 月度对比弹窗
+  showCompareModal() {
     const currentYear = this.currentMonth.getFullYear();
     const currentMonth = this.currentMonth.getMonth();
     const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
     
-    // 上月
     const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
     const lastMonthStr = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
     
-    const getMonthProfit = (monthStr) => {
+    const getMonthData = (monthStr) => {
       const txs = this.transactions.filter(tx => {
         const txDate = tx.occurred_at.split('T')[0];
         return txDate.startsWith(monthStr) && 
                (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
       });
-      return txs.reduce((sum, tx) => sum + (tx.type === 'income' ? tx.amount : -tx.amount), 0);
+      const profit = txs.reduce((sum, tx) => sum + (tx.type === 'income' ? tx.amount : -tx.amount), 0);
+      return { profit, count: txs.length };
     };
     
-    const currentProfit = getMonthProfit(currentMonthStr);
-    const lastProfit = getMonthProfit(lastMonthStr);
+    const current = getMonthData(currentMonthStr);
+    const last = getMonthData(lastMonthStr);
     
-    if (lastProfit === 0 && currentProfit === 0) {
-      compareSection.style.display = 'none';
-      return;
-    }
+    // 更新标题
+    const lastMonthName = `${lastMonthDate.getMonth() + 1}月`;
+    const currentMonthName = `${currentMonth + 1}月`;
+    document.getElementById('compare-modal-title').textContent = `${currentMonthName} vs ${lastMonthName}`;
     
-    compareSection.style.display = 'block';
+    // 更新数值
+    document.getElementById('compare-current-value').textContent = `¥${Math.abs(current.profit).toFixed(2)}`;
+    document.getElementById('compare-current-count').textContent = `${current.count} 笔`;
+    document.getElementById('compare-last-value').textContent = `¥${Math.abs(last.profit).toFixed(2)}`;
+    document.getElementById('compare-last-count').textContent = `${last.count} 笔`;
     
-    const compareValue = document.getElementById('compare-value');
-    const compareBarFill = document.getElementById('compare-bar-fill');
+    // 更新对比结果
+    const resultDiv = document.getElementById('compare-result');
+    const changeDiv = resultDiv.querySelector('.compare-change');
+    const summaryDiv = resultDiv.querySelector('.compare-summary');
     
-    if (lastProfit === 0) {
-      compareValue.textContent = currentProfit >= 0 ? `+¥${currentProfit.toFixed(2)}` : `-¥${Math.abs(currentProfit).toFixed(2)}`;
-      compareValue.className = 'compare-value ' + (currentProfit >= 0 ? 'up' : 'down');
-      compareBarFill.style.width = '100%';
+    if (last.profit === 0 && current.profit === 0) {
+      changeDiv.textContent = '--';
+      changeDiv.className = 'compare-change neutral';
+      summaryDiv.textContent = '两个月都没有数据';
+    } else if (last.profit === 0) {
+      changeDiv.textContent = current.profit >= 0 ? '+¥' + current.profit.toFixed(2) : '-¥' + Math.abs(current.profit).toFixed(2);
+      changeDiv.className = 'compare-change ' + (current.profit >= 0 ? 'up' : 'down');
+      summaryDiv.textContent = '上月无数据';
     } else {
-      const change = ((currentProfit - lastProfit) / Math.abs(lastProfit)) * 100;
+      const change = ((current.profit - last.profit) / Math.abs(last.profit)) * 100;
       const isUp = change >= 0;
-      compareValue.textContent = `${isUp ? '↑' : '↓'} ${Math.abs(change).toFixed(1)}%`;
-      compareValue.className = 'compare-value ' + (isUp ? 'up' : 'down');
+      changeDiv.textContent = `${isUp ? '↑' : '↓'} ${Math.abs(change).toFixed(1)}%`;
+      changeDiv.className = 'compare-change ' + (isUp ? 'up' : 'down');
       
-      // 进度条（相对比例）
-      const ratio = Math.min(Math.abs(currentProfit) / Math.max(Math.abs(lastProfit), Math.abs(currentProfit)), 1);
-      compareBarFill.style.width = `${ratio * 100}%`;
+      const diff = current.profit - last.profit;
+      if (isUp) {
+        summaryDiv.textContent = `比上月多赚 ¥${diff.toFixed(2)}`;
+      } else {
+        summaryDiv.textContent = `比上月少赚 ¥${Math.abs(diff).toFixed(2)}`;
+      }
     }
+    
+    document.getElementById('compare-modal').style.display = 'flex';
   },
   
   // 渲染历史记录
@@ -726,6 +741,11 @@ async function submitEdit() {
   } catch (e) {
     window.App.showToast('保存失败: ' + e.message, 'error');
   }
+}
+
+// 关闭对比弹窗
+function closeCompareModal() {
+  document.getElementById('compare-modal').style.display = 'none';
 }
 
 // 关闭图表弹窗

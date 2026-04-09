@@ -132,6 +132,12 @@
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                 </svg>
               </button>
+              <button id="toggle-compare-btn" class="icon-btn" title="月度对比">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="9"></rect>
+                  <rect x="14" y="12" width="7" height="9"></rect>
+                </svg>
+              </button>
             </div>
           </div>
           <div class="calendar-header">
@@ -141,18 +147,7 @@
           </div>
           <div class="calendar-grid" id="calendar-grid"></div>
           
-          <!-- 月度对比 -->
-  <div class="compare-section" id="compare-section" style="display:none;">
-    <div class="compare-card">
-      <div class="compare-label">本月 vs 上月</div>
-      <div class="compare-value" id="compare-value">--</div>
-      <div class="compare-bar">
-        <div class="compare-bar-fill" id="compare-bar-fill"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="month-stats" id="month-stats">
+          <div class="month-stats" id="month-stats">
             <div class="stat-item">
               <span>本月利润</span>
               <span id="month-profit">¥0.00</span>
@@ -170,7 +165,13 @@
             <h2 id="history-title">最近记录</h2>
             <div class="header-actions">
               <div class="dropdown">
-                <button id="export-btn" class="icon-btn">📤</button>
+                <button id="export-btn" class="icon-btn" title="导出">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </button>
                 <div id="export-menu" class="dropdown-menu" style="display:none;">
                   <button data-range="current">本月数据</button>
                   <button data-range="last">上月数据</button>
@@ -182,6 +183,37 @@
           <div id="history-list" class="history-list"></div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <!-- 月度对比弹窗 -->
+  <div id="compare-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="compare-modal-title">月度对比</h3>
+        <button class="modal-close" onclick="closeCompareModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="compare-detail">
+          <div class="compare-months">
+            <div class="compare-month current">
+              <div class="compare-month-label">本月</div>
+              <div class="compare-month-value" id="compare-current-value">¥0.00</div>
+              <div class="compare-month-count" id="compare-current-count">0 笔</div>
+            </div>
+            <div class="compare-arrow">→</div>
+            <div class="compare-month last">
+              <div class="compare-month-label">上月</div>
+              <div class="compare-month-value" id="compare-last-value">¥0.00</div>
+              <div class="compare-month-count" id="compare-last-count">0 笔</div>
+            </div>
+          </div>
+          <div class="compare-result" id="compare-result">
+            <div class="compare-change">--</div>
+            <div class="compare-summary">--</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
