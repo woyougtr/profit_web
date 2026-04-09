@@ -1,12 +1,12 @@
 // App 状态
 const App = {
   currentMonth: new Date(),
+  selectedDate: null,  // 选中的日期
   transactions: [],
   exchangeRate: 7.24,
   
   // 初始化
   async init() {
-    // 检查登录状态
     const token = TokenManager.get();
     if (token) {
       try {
@@ -23,15 +23,6 @@ const App = {
     }
     
     this.bindEvents();
-  },
-  
-  // 加载汇率
-  async loadExchangeRate() {
-    const rate = await API.getExchangeRate();
-    if (rate) {
-      this.exchangeRate = rate;
-      document.getElementById('exchange-rate').value = rate.toFixed(4);
-    }
   },
   
   // 绑定事件
@@ -59,6 +50,7 @@ const App = {
         const data = await API.login(email, password);
         TokenManager.set(data.token);
         this.showMainPage(data.user.email);
+        await this.loadExchangeRate();
         await this.loadData();
       } catch (e) {
         document.getElementById('auth-error').textContent = e.message;
@@ -75,6 +67,7 @@ const App = {
         const data = await API.register(email, password);
         TokenManager.set(data.token);
         this.showMainPage(data.user.email);
+        await this.loadExchangeRate();
         await this.loadData();
       } catch (e) {
         document.getElementById('auth-error').textContent = e.message;
@@ -107,12 +100,14 @@ const App = {
     
     // 日历导航
     document.getElementById('prev-month').addEventListener('click', () => {
+      this.selectedDate = null;
       this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
       this.renderCalendar();
       this.renderHistory();
     });
     
     document.getElementById('next-month').addEventListener('click', () => {
+      this.selectedDate = null;
       this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
       this.renderCalendar();
       this.renderHistory();
@@ -135,7 +130,6 @@ const App = {
   // 加载数据
   async loadData() {
     try {
-      // 同步获取最新数据
       const syncResult = await API.sync('1970-01-01T00:00:00Z', []);
       this.transactions = syncResult.serverUpdates || [];
       this.renderCalendar();
@@ -143,6 +137,15 @@ const App = {
       this.renderMonthStats();
     } catch (e) {
       console.error('加载数据失败:', e);
+    }
+  },
+  
+  // 加载汇率
+  async loadExchangeRate() {
+    const rate = await API.getExchangeRate();
+    if (rate) {
+      this.exchangeRate = rate;
+      document.getElementById('exchange-rate').value = rate.toFixed(4);
     }
   },
   
@@ -162,7 +165,6 @@ const App = {
     const firstShipAmount = getValue('first-shipping', 'first-shipping-currency');
     const lastShipAmount = getValue('last-shipping', 'last-shipping-currency');
     
-    // 利润 = (售价 + 补贴 - 尾程) - 成本 - 头程
     const profit = (saleAmount + subsidyAmount - lastShipAmount) - costAmount - firstShipAmount;
     
     const preview = document.getElementById('profit-preview');
@@ -181,6 +183,7 @@ const App = {
   
   // 保存记录
   async saveRecord() {
+    const editId = document.getElementById('edit-id').value;
     const profit = this.calculateProfit();
     const rate = this.exchangeRate;
     
@@ -194,31 +197,81 @@ const App = {
     const lastShipping = getValue('last-shipping');
     const note = document.getElementById('note').value;
     
-    // 构建备注
     const noteText = note || `售价${getCurrency('sale-currency')}${salePrice} 补贴${getCurrency('subsidy-currency')}${subsidy} 成本${getCurrency('cost-currency')}${cost} 头程${getCurrency('first-shipping-currency')}${firstShipping} 尾程${getCurrency('last-shipping-currency')}${lastShipping} 汇率${rate}`;
     
     try {
-      await API.createTransaction({
-        account_id: 'cash',
-        category_id: profit >= 0 ? 'ecommerce_profit' : 'ecommerce_loss',
-        type: profit >= 0 ? 'income' : 'expense',
-        amount: Math.abs(profit),
-        note: noteText,
-        occurred_at: new Date().toISOString()
-      });
+      if (editId) {
+        // 编辑模式
+        await API.updateTransaction(editId, {
+          amount: Math.abs(profit),
+          note: noteText,
+          occurred_at: new Date().toISOString()
+        });
+      } else {
+        // 新增模式
+        await API.createTransaction({
+          account_id: 'cash',
+          category_id: profit >= 0 ? 'ecommerce_profit' : 'ecommerce_loss',
+          type: profit >= 0 ? 'income' : 'expense',
+          amount: Math.abs(profit),
+          note: noteText,
+          occurred_at: this.selectedDate ? `${this.selectedDate}T12:00:00Z` : new Date().toISOString()
+        });
+      }
       
-      // 重新加载数据
       await this.loadData();
-      
-      // 清空表单
-      ['sale-price', 'subsidy', 'cost', 'first-shipping', 'last-shipping', 'note'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-      
+      this.resetForm();
       alert('保存成功！');
     } catch (e) {
       alert('保存失败: ' + e.message);
     }
+  },
+  
+  // 重置表单
+  resetForm() {
+    ['sale-price', 'subsidy', 'cost', 'first-shipping', 'last-shipping', 'note'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('edit-id').value = '';
+    document.getElementById('save-btn').textContent = '保存记录';
+    this.calculateProfit();
+  },
+  
+  // 编辑记录
+  editRecord(tx) {
+    document.getElementById('edit-id').value = tx.id;
+    document.getElementById('note').value = tx.note || '';
+    document.getElementById('save-btn').textContent = '更新记录';
+    
+    // 滚动到计算器
+    document.querySelector('.calculator').scrollIntoView({ behavior: 'smooth' });
+  },
+  
+  // 删除记录
+  async deleteRecord(id) {
+    if (!confirm('确定要删除这条记录吗？')) return;
+    
+    try {
+      await API.deleteTransaction(id);
+      await this.loadData();
+      alert('删除成功');
+    } catch (e) {
+      alert('删除失败: ' + e.message);
+    }
+  },
+  
+  // 获取某天的利润
+  getDayProfit(dateStr) {
+    const dayTransactions = this.transactions.filter(tx => {
+      const txDate = tx.occurred_at.split('T')[0];
+      return txDate === dateStr && (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
+    });
+    
+    if (dayTransactions.length === 0) return null;
+    
+    return dayTransactions.reduce((sum, tx) => {
+      return sum + (tx.type === 'income' ? tx.amount : -tx.amount);
+    }, 0);
   },
   
   // 渲染日历
@@ -237,7 +290,6 @@ const App = {
       grid.innerHTML += `<div class="calendar-day-header">${day}</div>`;
     });
     
-    // 第一天是星期几
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const today = new Date();
@@ -250,25 +302,42 @@ const App = {
     // 日期
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const dayTransactions = this.transactions.filter(tx => {
-        const txDate = tx.occurred_at.split('T')[0];
-        return txDate === dateStr && (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
-      });
+      const profit = this.getDayProfit(dateStr);
       
       let className = 'calendar-day';
-      if (year === today.getFullYear() && month === today.getMonth() && d === today.getDate()) {
-        className += ' today';
+      const isSelected = this.selectedDate === dateStr;
+      const isToday = year === today.getFullYear() && month === today.getMonth() && d === today.getDate();
+      
+      if (isSelected) className += ' selected';
+      else if (isToday) className += ' today';
+      
+      if (profit !== null) {
+        className += profit >= 0 ? ' has-profit' : ' has-loss';
       }
       
-      if (dayTransactions.length > 0) {
-        const total = dayTransactions.reduce((sum, tx) => {
-          return sum + (tx.type === 'income' ? tx.amount : -tx.amount);
-        }, 0);
-        className += total >= 0 ? ' has-profit' : ' has-loss';
+      // 显示金额
+      let amountHtml = '';
+      if (profit !== null) {
+        const displayProfit = profit >= 0 ? `+${profit.toFixed(0)}` : profit.toFixed(0);
+        amountHtml = `<span class="day-amount">${displayProfit}</span>`;
       }
       
-      grid.innerHTML += `<div class="${className}" data-date="${dateStr}">${d}</div>`;
+      grid.innerHTML += `<div class="${className}" data-date="${dateStr}">${d}${amountHtml}</div>`;
     }
+    
+    // 绑定点击事件
+    grid.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
+      day.addEventListener('click', () => {
+        const date = day.dataset.date;
+        if (this.selectedDate === date) {
+          this.selectedDate = null;  // 取消选择
+        } else {
+          this.selectedDate = date;
+        }
+        this.renderCalendar();
+        this.renderHistory();
+      });
+    });
   },
   
   // 渲染月统计
@@ -287,32 +356,47 @@ const App = {
       return sum + (tx.type === 'income' ? tx.amount : -tx.amount);
     }, 0);
     
-    document.getElementById('month-profit').textContent = 
-      `¥${totalProfit >= 0 ? '' : '-'}${Math.abs(totalProfit).toFixed(2)}`;
-    document.getElementById('month-profit').style.color = totalProfit >= 0 ? 'var(--income)' : 'var(--expense)';
+    const profitEl = document.getElementById('month-profit');
+    profitEl.textContent = `¥${totalProfit >= 0 ? '' : '-'}${Math.abs(totalProfit).toFixed(2)}`;
+    profitEl.style.color = totalProfit >= 0 ? 'var(--income)' : 'var(--expense)';
     document.getElementById('month-count').textContent = monthTransactions.length;
   },
   
   // 渲染历史记录
   renderHistory() {
-    const year = this.currentMonth.getFullYear();
-    const month = this.currentMonth.getMonth();
-    const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const titleEl = document.getElementById('history-title');
     
-    const monthTransactions = this.transactions.filter(tx => {
-      const txDate = tx.occurred_at.split('T')[0];
-      return txDate.startsWith(monthStr) && 
-             (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
-    }).sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at));
+    let filteredTransactions = this.transactions.filter(tx => {
+      return tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss';
+    });
+    
+    // 如果选了日期，按日期筛选
+    if (this.selectedDate) {
+      filteredTransactions = filteredTransactions.filter(tx => {
+        const txDate = tx.occurred_at.split('T')[0];
+        return txDate === this.selectedDate;
+      });
+      const date = new Date(this.selectedDate);
+      titleEl.textContent = `${date.getMonth() + 1}月${date.getDate()}日 记录`;
+    } else {
+      // 显示当月所有记录，按时间倒序
+      const year = this.currentMonth.getFullYear();
+      const month = this.currentMonth.getMonth();
+      const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+      filteredTransactions = filteredTransactions
+        .filter(tx => tx.occurred_at.startsWith(monthStr))
+        .sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at));
+      titleEl.textContent = '本月记录';
+    }
     
     const list = document.getElementById('history-list');
     
-    if (monthTransactions.length === 0) {
+    if (filteredTransactions.length === 0) {
       list.innerHTML = '<div class="loading">暂无记录</div>';
       return;
     }
     
-    list.innerHTML = monthTransactions.map(tx => {
+    list.innerHTML = filteredTransactions.map(tx => {
       const date = new Date(tx.occurred_at);
       const dateStr = `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
       const isProfit = tx.type === 'income';
@@ -326,6 +410,10 @@ const App = {
           <div class="amount ${isProfit ? 'profit' : 'loss'}">
             ${isProfit ? '+' : '-'}¥${tx.amount.toFixed(2)}
           </div>
+          <div class="actions">
+            <button class="edit-btn" onclick="App.editRecord(${JSON.stringify(tx).replace(/"/g, '&quot;')})">编辑</button>
+            <button class="delete-btn" onclick="App.deleteRecord('${tx.id}')">删除</button>
+          </div>
         </div>
       `;
     }).join('');
@@ -333,4 +421,4 @@ const App = {
 };
 
 // 启动
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener('DOMContentLoaded', () => window.App = App.init());

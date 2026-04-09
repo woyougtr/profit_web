@@ -477,6 +477,66 @@ main {
   color: var(--expense);
 }
 
+.history-item .actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.history-item .edit-btn,
+.history-item .delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.history-item .edit-btn {
+  background: var(--background);
+  color: var(--text-secondary);
+}
+
+.history-item .edit-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.history-item .delete-btn {
+  background: var(--background);
+  color: var(--expense);
+}
+
+.history-item .delete-btn:hover {
+  background: var(--expense);
+  color: white;
+}
+
+/* 日历每天底部的金额 */
+.calendar-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.calendar-day .day-amount {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.calendar-day.has-profit .day-amount {
+  color: var(--income);
+}
+
+.calendar-day.has-loss .day-amount {
+  color: var(--expense);
+}
+
 .loading {
   text-align: center;
   padding: 40px;

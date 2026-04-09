@@ -111,6 +111,27 @@ const API = {
     return res.json();
   },
   
+  // 更新交易
+  async updateTransaction(id, data) {
+    const res = await fetch(`${API_BASE}/api/transactions/${id}`, {
+      method: 'PUT',
+      headers: TokenManager.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('更新记录失败');
+    return res.json();
+  },
+  
+  // 删除交易
+  async deleteTransaction(id) {
+    const res = await fetch(`${API_BASE}/api/transactions/${id}`, {
+      method: 'DELETE',
+      headers: TokenManager.getHeaders()
+    });
+    if (!res.ok) throw new Error('删除记录失败');
+    return res.ok;
+  },
+  
   // 获取分类
   async getCategories() {
     const res = await fetch(`${API_BASE}/api/categories`, {
