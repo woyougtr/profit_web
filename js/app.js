@@ -237,14 +237,12 @@ const App = {
     this.calculateProfit();
   },
   
-  // 编辑记录
-  editRecord(tx) {
-    document.getElementById('edit-id').value = tx.id;
-    document.getElementById('note').value = tx.note || '';
-    document.getElementById('save-btn').textContent = '更新记录';
-    
-    // 滚动到计算器
-    document.querySelector('.calculator').scrollIntoView({ behavior: 'smooth' });
+  // 打开编辑弹窗
+  openEditModal(tx) {
+    this.editingId = tx.id;
+    document.getElementById('edit-amount').value = tx.amount;
+    document.getElementById('edit-note').value = tx.note || '';
+    document.getElementById('edit-modal').style.display = 'flex';
   },
   
   // 删除记录
@@ -254,7 +252,6 @@ const App = {
     try {
       await API.deleteTransaction(id);
       await this.loadData();
-      alert('删除成功');
     } catch (e) {
       alert('删除失败: ' + e.message);
     }
@@ -411,7 +408,7 @@ const App = {
             ${isProfit ? '+' : '-'}¥${tx.amount.toFixed(2)}
           </div>
           <div class="actions">
-            <button class="edit-btn" onclick="App.editRecord(${JSON.stringify(tx).replace(/"/g, '&quot;')})">编辑</button>
+            <button class="edit-btn" onclick="App.openEditModal(${JSON.stringify(tx).replace(/"/g, '&quot;')})">编辑</button>
             <button class="delete-btn" onclick="App.deleteRecord('${tx.id}')">删除</button>
           </div>
         </div>
@@ -419,6 +416,36 @@ const App = {
     }).join('');
   }
 };
+
+// 关闭编辑弹窗
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+// 提交编辑
+async function submitEdit() {
+  const id = window.App.editingId;
+  if (!id) return;
+  
+  const amount = parseFloat(document.getElementById('edit-amount').value);
+  const note = document.getElementById('edit-note').value;
+  
+  if (!amount || amount <= 0) {
+    alert('请输入有效金额');
+    return;
+  }
+  
+  try {
+    await API.updateTransaction(id, {
+      amount: amount,
+      note: note
+    });
+    closeEditModal();
+    await window.App.loadData();
+  } catch (e) {
+    alert('保存失败: ' + e.message);
+  }
+}
 
 // 启动
 document.addEventListener('DOMContentLoaded', () => window.App = App.init());

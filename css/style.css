@@ -378,9 +378,10 @@ main {
 }
 
 .calendar-day.selected {
-  background: var(--primary);
-  color: white;
+  background: rgba(76, 175, 124, 0.15);
+  color: var(--primary);
   font-weight: 600;
+  border-radius: 10px;
 }
 
 .month-stats {
@@ -535,6 +536,147 @@ main {
 
 .calendar-day.has-loss .day-amount {
   color: var(--expense);
+}
+
+/* ===== 弹窗样式 ===== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 360px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--background);
+  border-radius: 50%;
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: var(--expense);
+  color: white;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-amount {
+  margin-bottom: 20px;
+}
+
+.modal-amount label,
+.modal-note label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.modal-amount input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: border-color 0.2s;
+}
+
+.modal-amount input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.modal-note textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  resize: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.modal-note textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+}
+
+.modal-cancel,
+.modal-save {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-cancel {
+  background: var(--background);
+  color: var(--text-secondary);
+}
+
+.modal-cancel:hover {
+  background: var(--border);
+}
+
+.modal-save {
+  background: var(--primary);
+  color: white;
+}
+
+.modal-save:hover {
+  background: var(--primary-light);
 }
 
 .loading {
