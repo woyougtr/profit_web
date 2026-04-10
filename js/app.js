@@ -269,7 +269,14 @@ window.App = {
           type: profit >= 0 ? 'income' : 'expense',
           amount: Math.abs(profit),
           note: noteText,
-          occurred_at: this.selectedDate ? `${this.selectedDate}T12:00:00Z` : new Date().toISOString()
+          occurred_at: (() => {
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            if (!this.selectedDate || this.selectedDate === today) {
+              return now.toISOString();
+            }
+            return `${this.selectedDate}T12:00:00Z`;
+          })()
         });
       }
       
@@ -587,7 +594,7 @@ window.App = {
         return txDate === this.selectedDate;
       });
       const date = new Date(this.selectedDate);
-      titleEl.textContent = `${date.getMonth() + 1}月${date.getDate()}日 记录`;
+      titleEl.textContent = `${date.getMonth() + 1}月${date.getDate()}日 记录 (${filteredTransactions.length}条)`;
     } else {
       const year = this.currentMonth.getFullYear();
       const month = this.currentMonth.getMonth();
