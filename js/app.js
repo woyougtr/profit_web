@@ -358,9 +358,9 @@ window.App = {
     toast.textContent = message;
     toast.style.cssText = `
       position: fixed;
-      top: 20px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       padding: 12px 24px;
       background: ${type === 'error' ? '#EF5350' : '#4CAF7C'};
       color: white;
@@ -886,12 +886,12 @@ function confirmExport() {
 const style = document.createElement('style');
 style.textContent = `
   @keyframes toastIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
   @keyframes toastOut {
-    from { opacity: 1; transform: translateX(-50%) translateY(0); }
-    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    to { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
   }
 `;
 document.head.appendChild(style);
