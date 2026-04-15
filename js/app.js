@@ -5,6 +5,7 @@ window.App = {
   transactions: [],
   exchangeRate: 7.24,
   chartInstance: null,
+  currentChartTab: 'profit',  // 当前图表Tab：profit 或 count
   
   // 初始化
   async init() {
@@ -391,6 +392,18 @@ window.App = {
     }, 0);
   },
   
+  // 获取某天的单量（有记录的天数）
+  getDayCount(dateStr) {
+    const dayTransactions = this.transactions.filter(tx => {
+      const txDate = tx.occurred_at.split('T')[0];
+      return txDate === dateStr && (tx.category_id === 'ecommerce_profit' || tx.category_id === 'ecommerce_loss');
+    });
+    
+    if (dayTransactions.length === 0) return null;
+    
+    return dayTransactions.length;
+  },
+  
   // 渲染日历
   renderCalendar() {
     const year = this.currentMonth.getFullYear();
@@ -728,8 +741,23 @@ window.App = {
   
   // ========== 图表 ==========
   showChartModal() {
+    this.currentChartTab = 'profit';
     document.getElementById('chart-modal').style.display = 'flex';
+    // 重置 Tab 样式
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.tab === 'profit');
+    });
     this.renderChart();
+    
+    // 绑定 Tab 点击事件
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+      tab.onclick = () => {
+        this.currentChartTab = tab.dataset.tab;
+        document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.renderChart();
+      };
+    });
   },
   
   renderChart() {
@@ -749,14 +777,15 @@ window.App = {
     // 准备数据（只到今天）
     const labels = [];
     const dailyData = [];
+    const isProfit = this.currentChartTab === 'profit';
     
     for (let d = 1; d <= lastDay; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       labels.push(`${month + 1}/${d}`);
       
-      const profit = this.getDayProfit(dateStr);
+      const value = isProfit ? this.getDayProfit(dateStr) : this.getDayCount(dateStr);
       // 没数据的日期设为null，这样图表会断开
-      dailyData.push(profit);
+      dailyData.push(value);
     }
     
     this.chartInstance = new Chart(ctx, {
@@ -764,10 +793,10 @@ window.App = {
       data: {
         labels: labels,
         datasets: [{
-          label: '日利润',
+          label: isProfit ? '日利润' : '日单量',
           data: dailyData,
-          borderColor: '#4CAF7C',
-          backgroundColor: 'rgba(76, 175, 124, 0.1)',
+          borderColor: isProfit ? '#4CAF7C' : '#2196F3',
+          backgroundColor: isProfit ? 'rgba(76, 175, 124, 0.1)' : 'rgba(33, 150, 243, 0.1)',
           fill: true,
           tension: 0.3,
           pointRadius: 2,
@@ -789,18 +818,18 @@ window.App = {
           tooltip: {
             filter: (item) => item.raw !== null,
             callbacks: {
-              label: (context) => context.raw !== null ? `¥${context.raw.toFixed(2)}` : ''
+              label: (context) => context.raw !== null ? (isProfit ? `¥${context.raw.toFixed(2)}` : `${context.raw} 单`) : ''
             }
           }
         },
         scales: {
           y: {
-            beginAtZero: false,
+            beginAtZero: isProfit ? false : true,  // 单量从0开始，利润不强制
             grid: {
               color: '#f0f0f0'
             },
             ticks: {
-              callback: (value) => '¥' + value.toFixed(0)
+              callback: (value) => isProfit ? '¥' + value.toFixed(0) : value + '单'
             }
           },
           x: {

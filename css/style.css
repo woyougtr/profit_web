@@ -985,6 +985,34 @@ main {
   width: 95%;
 }
 
+.chart-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-tab {
+  padding: 8px 20px;
+  border: none;
+  background: var(--background);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-tab:hover {
+  color: var(--primary);
+}
+
+.chart-tab.active {
+  background: var(--primary);
+  color: white;
+}
+
 .chart-modal-content .modal-body {
   padding: 20px;
   max-height: 60vh;
