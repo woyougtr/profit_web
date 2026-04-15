@@ -730,22 +730,15 @@ window.App = {
     
     // 准备数据（只到今天）
     const labels = [];
-    const cumulativeData = [];
-    let cumulative = 0;
-    let lastValidIndex = -1;
+    const dailyData = [];
     
     for (let d = 1; d <= lastDay; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       labels.push(`${month + 1}/${d}`);
       
       const profit = this.getDayProfit(dateStr);
-      if (profit !== null) {
-        cumulative += profit;
-        lastValidIndex = d - 1;
-      }
-      
       // 没数据的日期设为null，这样图表会断开
-      cumulativeData.push(profit !== null ? cumulative : null);
+      dailyData.push(profit);
     }
     
     this.chartInstance = new Chart(ctx, {
@@ -753,8 +746,8 @@ window.App = {
       data: {
         labels: labels,
         datasets: [{
-          label: '累计利润',
-          data: cumulativeData,
+          label: '日利润',
+          data: dailyData,
           borderColor: '#4CAF7C',
           backgroundColor: 'rgba(76, 175, 124, 0.1)',
           fill: true,
