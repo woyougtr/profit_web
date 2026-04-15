@@ -54,7 +54,16 @@ window.App = {
         await this.loadExchangeRate();
         await this.loadData();
       } catch (e) {
-        document.getElementById('auth-error').textContent = e.message;
+        const errorMap = {
+          'User already exists': '该邮箱已注册',
+          'Invalid email': '邮箱格式不正确',
+          'Invalid credentials': '邮箱或密码错误',
+          'User not found': '该账号不存在',
+          'Invalid password': '密码错误',
+          'Password too short': '密码至少6位',
+        };
+        const msg = errorMap[e.message] || e.message;
+        this.showToast(msg, 'error');
       }
     });
     
@@ -71,7 +80,16 @@ window.App = {
         await this.loadExchangeRate();
         await this.loadData();
       } catch (e) {
-        document.getElementById('auth-error').textContent = e.message;
+        const errorMap = {
+          'User already exists': '该邮箱已注册',
+          'Invalid email': '邮箱格式不正确',
+          'Invalid credentials': '邮箱或密码错误',
+          'User not found': '该账号不存在',
+          'Invalid password': '密码错误',
+          'Password too short': '密码至少6位',
+        };
+        const msg = errorMap[e.message] || e.message;
+        this.showToast(msg, 'error');
       }
     });
     
