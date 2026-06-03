@@ -12,8 +12,8 @@ window.App = {
     const token = TokenManager.get();
     if (token) {
       try {
-        const user = await API.me();
-        this.showMainPage(user.email);
+        const data = await API.me();
+        this.showMainPage(data.user.email);
         await this.loadExchangeRate();
         await this.loadData();
       } catch (e) {
