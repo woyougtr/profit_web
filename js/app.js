@@ -206,7 +206,14 @@ window.App = {
   async loadData() {
     try {
       const syncResult = await API.sync('1970-01-01T00:00:00Z', []);
-      this.transactions = syncResult.serverUpdates || [];
+      const newTransactions = syncResult.serverUpdates || [];
+
+      // 增量合并：保留本地数据，用新数据更新
+      const mergedMap = new Map();
+      this.transactions.forEach(tx => mergedMap.set(tx.id, tx));
+      newTransactions.forEach(tx => mergedMap.set(tx.id, tx));
+      this.transactions = Array.from(mergedMap.values());
+
       this.renderCalendar();
       this.renderHistory();
       this.renderMonthStats();
